@@ -1,10 +1,6 @@
-import discord
-from discord import app_commands
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from decks import DECKS
+import json
 import os
-from datetime import datetime
+from oauth2client.service_account import ServiceAccountCredentials
 
 # -------------------------
 # Google Sheets 認証
@@ -13,9 +9,17 @@ scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
-creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+
+# 環境変数から JSON を読み込む
+json_str = os.environ["GOOGLE_CREDENTIALS"]
+info = json.loads(json_str)
+
+# JSON から直接認証情報を作成
+creds = ServiceAccountCredentials.from_json_keyfile_dict(info, scope)
+
 gs_client = gspread.authorize(creds)
 sheet = gs_client.open(os.getenv("GOOGLE_SHEET")).sheet1
+
 
 # -------------------------
 # Discord Bot 設定
